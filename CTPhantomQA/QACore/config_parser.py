@@ -37,7 +37,8 @@ class ModuleConfig:
     def from_dict(cls, data: Dict[str, Any]) -> "ModuleConfig":
 
         targets = {}
-        extra_params = {}
+        extra_params = {key: val for key, val in data.items()  if key not in ["relative_z_offset_mm", "targets"]}
+
         if "targets" in data.keys():
 
             for key, val in data["targets"].items(): 
@@ -60,6 +61,7 @@ class PhantomConfig:
         parsed_modules = {}
         for key, val in data["modules"].items():
             parsed_modules.update({key: ModuleConfig.from_dict(val)})
+
 
         return cls(phantom_name=data["phantom_name"], modules=parsed_modules)
 
