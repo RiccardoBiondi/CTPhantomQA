@@ -1,0 +1,35 @@
+{
+    "phantom_name": "TestPhantom",
+    "modules": {
+        "Test101": {
+            "relative_z_offset_mm": 0,
+            "roi_radius_mm": 5,
+            "targets": {
+                "Air": {
+                    "angle_deg": 0,
+                    "distance_mm": 50,
+                    "expected_hu": -1000,
+                    "tolerance": 20
+                },
+                "Teflon": {
+                    "angle_deg": 120,
+                    "distance_mm": 50,
+                    "expected_hu": 990,
+                    "tolerance": 20
+                },
+                "Acrylic": {
+                    "angle_deg": 240,
+                    "distance_mm": 50,
+                    "expected_hu": 120,
+                    "tolerance": 10
+                }
+            }
+        },
+        "Test202": {
+            "relative_z_offset_mm": -40,
+            "roi_radius_mm": 10,
+            "expected_homogeneity_hu": 0,
+            "tolerance": 5
+        }
+    }
+}
