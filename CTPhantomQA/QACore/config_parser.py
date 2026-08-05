@@ -39,6 +39,7 @@ class PhantomConfig:
         with open(path, "r", encoding="utf-8") as fp:
             data = json.load(fp)
 
+        #TODO add sanity checks!
         parsed_modules = []
         for module in data["modules"]:
             parsed_modules.append(ModuleConfig.from_dict(module)) 

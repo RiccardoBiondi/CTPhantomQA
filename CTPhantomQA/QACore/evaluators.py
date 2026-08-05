@@ -8,6 +8,8 @@ from numpy.typing import NDArray
 __author__ = ["Riccardo Biondi"]
 __email__ = ["riccardo.biondi@proton.me"]
 
+# TODO think about the registry pattern to easily add custom analysis classes
+
 
 #
 # Implementation of the different analysis strategies for the different scenarios (hu, linearity, thickness, etc.)
@@ -16,29 +18,29 @@ __email__ = ["riccardo.biondi@proton.me"]
 class BaseAnalysisStrategy(ABC):
 
     @abstractmethod
-    def run(self, volume_array: NDArray, z_slice_index: int, v_node, params: Dict[str, Any]) -> Dict:
-       ...
+    def run(self, v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
+       raise NotImplementedError
 
 
 class HUAccuracyStrategy(BaseAnalysisStrategy):
 
-    def run(self, volume_array: NDArray, z_slice_index: int, v_node, params: Dict[str, Any]) -> Dict:
+    def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
         ...
 
 
 class SliceThicknessStrategy(BaseAnalysisStrategy):
 
-    def run(self, volume_array: NDArray, z_slice_index: int, v_node, params: Dict[str, Any]) -> Dict:
+    def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
         ...
 
 class HomogeneityUniformityStrategy(ABC):
 
-    def run(self, volume_array: NDArray, z_slice_index: int, v_node, params: Dict[str, Any]) -> Dict:
+    def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
         ...
 
 class SpatialResolutionMTFStrategy(ABC):
 
-    def run(self, volume_array: NDArray, z_slice_index: int, v_node, params: Dict[str, Any]) -> Dict:
+    def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
         ...
 
 
