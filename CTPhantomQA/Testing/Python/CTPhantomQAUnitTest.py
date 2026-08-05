@@ -32,16 +32,27 @@ class TestConfigParser:
         # read the phantom from the configuration file
 
         phantom = current_testing.from_json(json_path)
-        modules = phantom.modules
-        assert phantom.phantom_name == "TestPhantom"
-        assert list(modules.keys()) == ["Test101", "Test202"]
 
-        assert modules["Test101"].relative_z_offset_mm == 0
-        assert modules["Test202"].relative_z_offset_mm == -40
+        assert len(phantom.modules) == 2
 
-        assert list(modules["Test101"].targets.keys()) == ["Air", "Teflon", "Acrylic"]
+        test_101 = phantom.modules[0]
+        test_202 = phantom.modules[1]
 
-        assert modules["Test101"].targets["Air"].angle_deg == 0
-        assert modules["Test101"].targets["Air"].distance_mm == 50
-        assert modules["Test101"].targets["Air"].expected_hu == -1000
-        assert modules["Test101"].targets["Air"].tolerance == 20
+        assert test_101.name == "Test101"
+        assert test_101.analysis_type == "hu_accuracy"
+        assert test_101.relative_z_offset_mm == 0.0
+        assert test_101.parameters["roi_radius_mm"] == 5.0
+        assert test_101.parameters["targets"] ==  {
+                    "Air": {
+                        "angle_deg": 0,
+                        "distance_mm": 50,
+                        "expected_hu": -1000,
+                        "tolerance": 20
+                    }
+                }
+
+        assert test_202.name == "Test202"
+        assert test_202.analysis_type == "homogeneity"
+        assert test_202.relative_z_offset_mm == -40.0
+        assert test_202.parameters["expected_hu"] == 0
+        assert test_202.parameters["tolerance"] == 5
