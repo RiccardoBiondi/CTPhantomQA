@@ -34,9 +34,22 @@ class BaseAnalysisStrategy(ABC):
 
 
 class HUAccuracyStrategy(BaseAnalysisStrategy):
+    r"""
+    Perform the computation of the HUAccuracy on the specific phantom section 
+    and with the parameters specified from the phantom specific file
+    """
 
     def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
-        ...
+        r"""
+
+        """
+        # first of all, retrieve all the required information from the target image node
+
+        image = _get_v_node_image_information(v_node)
+
+        # extract the starting slice from the specified z_slice_index
+        # TODO: think about using a specific 
+        #slice_2d = 
 
 
 class SliceThicknessStrategy(BaseAnalysisStrategy):

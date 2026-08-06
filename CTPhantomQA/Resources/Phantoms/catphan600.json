@@ -25,56 +25,10 @@
             "relative_z_offset_mm": 0.0,
             "analyses": {
                 "homogeneity": {
-                    
+
                 }
             }
 
         }
     }
-}
-
-
-
-
-
-
-
-{
-    "phantom_name": "CatPhan 600",
-    "modules": [
-        {
-            "name": "CTP404",
-            "analysis_type": "hu_accuracy",
-            "relative_z_offset_mm": 0.0,
-            "parameters": {
-                "roi_radius_mm": 5.0,
-                "targets": {
-                    "Air": {
-                        "angle_deg": 0,
-                        "distance_mm": 50,
-                        "expected_hu": -1000,
-                        "tolerance": 20
-                    }
-                }
-            }
-        },
-        {
-            "name": "CTP404_Ramps",
-            "analysis_type": "slice_thickness",
-            "relative_z_offset_mm": 0.0,
-            "parameters": {
-                "ramp_angle_deg": 23.0,
-                "distance_from_center_mm": 40.0
-            }
-        },
-        {
-            "name": "CTP486",
-            "analysis_type": "homogeneity",
-            "relative_z_offset_mm": -40.0,
-            "parameters": {
-                "expected_hu": 0,
-                "tolerance": 5
-            }
-        }
-    ]
 }
