@@ -1,9 +1,10 @@
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 import numpy as np
 
 from typing import Dict, Any
 from numpy.typing import NDArray
 
+import slicer
 
 __author__ = ["Riccardo Biondi"]
 __email__ = ["riccardo.biondi@proton.me"]
@@ -14,6 +15,16 @@ __email__ = ["riccardo.biondi@proton.me"]
 #
 # Implementation of the different analysis strategies for the different scenarios (hu, linearity, thickness, etc.)
 #
+
+def _get_v_node_image_information(v_node) -> Dict[str, Any]:
+
+    return {
+        "spacing": v_node.GetSpacing(),
+        "origin": v_node.GetOrigin(),
+        "RAStoIJK": v_node.GetRASToIJKMatrix(),
+        "array":  slicer.util.arrayFromVolume(v_node)
+    }
+
 
 class BaseAnalysisStrategy(ABC):
 
@@ -33,10 +44,26 @@ class SliceThicknessStrategy(BaseAnalysisStrategy):
     def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
         ...
 
+
 class HomogeneityUniformityStrategy(ABC):
 
     def run(self,  v_node, z_slice_index: int, params: Dict[str, Any]) -> Dict:
-        ...
+
+        volume_info = _get_v_node_image_information(v_node)
+
+        # retrieve some useful information from the params
+        roi_radius_mm = params.get("roi_radius_mm", 5.0)
+        targets_config = params.get("targets", {})
+
+        # get the target slice for the analysis
+        slice_2d = volume_info["array"][z_slice_index, :, :]
+
+        # and extract the values for each specified target
+        # 
+        for target_name, target in targets_config.items():
+            print(target_name)
+
+
 
 class SpatialResolutionMTFStrategy(ABC):
 
