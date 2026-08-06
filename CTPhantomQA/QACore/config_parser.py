@@ -11,27 +11,25 @@ class PhantomConfigError(Exception):
     ...
 
 
+
 @dataclass(frozen=True)
 class ModuleConfig:
     r"""
     """
-
-    name: str
-    analysis_type: str
     relative_z_offset_mm: float
-    parameters: Dict[str, Any]
+    analyses: Dict[str, Dict[str, Any]]
 
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ModuleConfig":
 
-        return cls(name=data["name"], analysis_type=data["analysis_type"], relative_z_offset_mm=data["relative_z_offset_mm"], parameters=data["parameters"])
+        return cls(relative_z_offset_mm=data["relative_z_offset_mm"],analyses=data["analyses"])
 
 
 @dataclass(frozen=True)
 class PhantomConfig:
     phantom_name: str
-    modules: List[ModuleConfig]
+    modules: Dict[str, ModuleConfig]
 
     @classmethod
     def from_json(cls, path: Path | str) -> "PhantomConfig":
@@ -40,9 +38,7 @@ class PhantomConfig:
             data = json.load(fp)
 
         #TODO add sanity checks!
-        parsed_modules = []
-        for module in data["modules"]:
-            parsed_modules.append(ModuleConfig.from_dict(module)) 
+        parsed_modules = {key: ModuleConfig.from_dict(val) for key, val in data["modules"].items()}
 
 
         return cls(phantom_name=data["phantom_name"], modules=parsed_modules)

@@ -1,30 +1,37 @@
 {
     "phantom_name": "TestPhantom",
-    "modules": [
-        {
-            "name": "Test101",
-            "analysis_type": "hu_accuracy",
+    "modules": {
+        "Test101": {
             "relative_z_offset_mm": 0.0,
-            "parameters": {
-                "roi_radius_mm": 5.0,
-                "targets": {
-                    "Air": {
-                        "angle_deg": 0,
-                        "distance_mm": 50,
-                        "expected_hu": -1000,
-                        "tolerance": 20
+            "analyses": {
+                "hu_accuracy": {
+                    "roi_radius_mm": 5.0,
+                    "targets": {
+                            "Air": {
+                                "angle_deg": 0,
+                                "distance_mm": 50,
+                                "expected_hu": -1000,
+                                "tolerance": 20
+                        }
                     }
-                }
+                },
+                "homogenity": {}
             }
         },
-        {
-            "name": "Test202",
-            "analysis_type": "homogeneity",
+
+        "Test202": {
+
             "relative_z_offset_mm": -40.0,
-            "parameters": {
-                "expected_hu": 0,
-                "tolerance": 5
+            "analyses": {
+
+                "homogeneity": {}
             }
         }
-    ]
+
+    }
 }
+
+
+
+
+

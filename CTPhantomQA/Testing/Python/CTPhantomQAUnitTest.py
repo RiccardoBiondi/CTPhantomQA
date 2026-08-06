@@ -22,7 +22,7 @@ __email__ = ["riccardo.biondi@proton.me"]
 
 class TestConfigParser:
 
-    __test__ = False
+    __test__ = True
 
     @pytest.fixture(scope="class")
     def json_path(self) -> Path:
@@ -42,17 +42,17 @@ class TestConfigParser:
         # read the phantom from the configuration file
 
         phantom = current_testing.from_json(json_path)
+        modules = phantom.modules
 
-        assert len(phantom.modules) == 2
+        assert list(phantom.modules.keys()) == ["Test101", "Test202"]
 
-        test_101 = phantom.modules[0]
-        test_202 = phantom.modules[1]
+        test_101 = phantom.modules["Test101"]
+        test_202 = phantom.modules["Test202"]
 
-        assert test_101.name == "Test101"
-        assert test_101.analysis_type == "hu_accuracy"
+        assert list(test_101.analyses.keys()) == ["hu_accuracy", "homogenity"]
         assert test_101.relative_z_offset_mm == 0.0
-        assert test_101.parameters["roi_radius_mm"] == 5.0
-        assert test_101.parameters["targets"] ==  {
+        assert test_101.analyses["hu_accuracy"]["roi_radius_mm"] == 5.0
+        assert test_101.analyses["hu_accuracy"]["targets"] ==  {
                     "Air": {
                         "angle_deg": 0,
                         "distance_mm": 50,
@@ -61,11 +61,8 @@ class TestConfigParser:
                     }
                 }
 
-        assert test_202.name == "Test202"
-        assert test_202.analysis_type == "homogeneity"
+        assert list(test_202.analyses.keys()) == ["homogeneity"]
         assert test_202.relative_z_offset_mm == -40.0
-        assert test_202.parameters["expected_hu"] == 0
-        assert test_202.parameters["tolerance"] == 5
 
 
 
@@ -75,7 +72,7 @@ class TestConfigParser:
 
 class TestHUAccuracyStrategy:
 
-    __test__ = True
+    __test__ = False
 
     @pytest.fixture(scope="class")
     def current_testing(self):

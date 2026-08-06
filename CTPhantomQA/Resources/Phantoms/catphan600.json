@@ -1,4 +1,45 @@
 {
+    "phantom_name": "CatPhan600",
+    "modules": {
+        "CPT404": {
+            "relative_z_offset_mm": 0.0,
+            "analyses": {
+                "hu_accuracy": {
+                    "roi_radius_mm": 5.0,
+                    "targets": {
+                        "Air": {
+                            "angle_deg": 0,
+                            "distance_mm": 50,
+                            "expected_hu": -1000,
+                            "tolerance": 20
+                        }
+                    }
+                },
+                "slice_thickness": {
+                    "ramp_angle_deg": 23.0,
+                    "distance_from_center_mm": 40.0
+                }
+            }
+        },
+        "CPT486": {
+            "relative_z_offset_mm": 0.0,
+            "analyses": {
+                "homogeneity": {
+                    
+                }
+            }
+
+        }
+    }
+}
+
+
+
+
+
+
+
+{
     "phantom_name": "CatPhan 600",
     "modules": [
         {
