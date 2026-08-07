@@ -1,37 +1,30 @@
 {
-    "phantom_name": "TestPhantom",
-    "modules": {
-        "Test101": {
+
+    "protocol_name": "Test Protocol",
+    "phantom_name": "CatPhan600",
+    "modules": [
+
+        {
+            "module_name": "Test101",
             "relative_z_offset_mm": 0.0,
-            "analyses": {
-                "hu_accuracy": {
-                    "roi_radius_mm": 5.0,
-                    "targets": {
-                            "Air": {
-                                "angle_deg": 0,
-                                "distance_mm": 50,
-                                "expected_hu": -1000,
-                                "tolerance": 20
-                        }
-                    }
-                },
-                "homogenity": {}
-            }
+            "rois":[
+                {
+                    "id": "Air",
+                    "analysis": "hu_accuracy",
+                    "shape": "circular",
+                    "center": [0, 0],
+                    "radius_mm": 5.0
+                }
+
+            ]
+
         },
-
-        "Test202": {
-
+        {
+            "module_name": "Test202",
             "relative_z_offset_mm": -40.0,
-            "analyses": {
-
-                "homogeneity": {}
-            }
+            "analysis": "homogeneity",
+            "center": [0, 0],
+            "radius_mm": 5.0
         }
-
-    }
+    ]
 }
-
-
-
-
-
