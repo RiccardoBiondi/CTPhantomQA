@@ -1,5 +1,7 @@
 import logging
 import os
+import json
+import glob
 from typing import Annotated
 
 import vtk
@@ -16,10 +18,11 @@ from slicer.parameterNodeWrapper import (
 
 from slicer import vtkMRMLScalarVolumeNode
 
-
+from pathlib import Path
 #
 # test
 #
+from QACore.config_parser import PhantomConfig
 
 
 class CTPhantomQA(ScriptedLoadableModule):
@@ -29,22 +32,10 @@ class CTPhantomQA(ScriptedLoadableModule):
 
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = _("CTPhantomQA")  # TODO: make this more human readable by adding spaces
-        # TODO: set categories (folders where the module shows up in the module selector)
-        self.parent.categories = [translate("qSlicerAbstractCoreModule", "Examples")]
+        self.parent.title = _("CTPhantomQA") 
+        self.parent.categories = [translate("Radiology")]
         self.parent.dependencies = []  # TODO: add here list of module names that this module requires
         self.parent.contributors = ["Riccardo Biondi"]  # TODO: replace with "Firstname Lastname (Organization)"
-        # TODO: update with short description of the module and a link to online module documentation
-        # _() function marks text as translatable to other languages
-        self.parent.helpText = _("""
-This is an example of scripted loadable module bundled in an extension.
-See more information in <a href="https://github.com/organization/projectname#test">module documentation</a>.
-""")
-        # TODO: replace with organization, grant and thanks
-        self.parent.acknowledgementText = _("""
-This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc., Andras Lasso, PerkLab,
-and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
-""")
 
         # Additional initialization step after application startup is complete
         slicer.app.connect("startupCompleted()", registerSampleData)
@@ -118,15 +109,9 @@ class CTPhantomQAParameterNode:
     """
 
     inputVolume: vtkMRMLScalarVolumeNode
-    imageThreshold: Annotated[float, WithinRange(-100, 500)] = 100
-    invertThreshold: bool = False
-    thresholdedVolume: vtkMRMLScalarVolumeNode
-    invertedVolume: vtkMRMLScalarVolumeNode
-
-
-#
-# testWidget
-#
+    selectedConfigurationFile: Path
+    #outputTableNode: vtkMRMLTableNode
+    #roiMarkupsNode: vtkMRMLMarkupsFiducialNode # Phantom ROI points to plot on the volume
 
 
 class CTPhantomQAWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
@@ -161,6 +146,7 @@ class CTPhantomQAWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # in batch mode, without a graphical user interface.
         self.logic = CTPhantomQALogic()
 
+
         # Connections
 
         # These connections ensure that we update parameter node when scene is closed
@@ -172,6 +158,8 @@ class CTPhantomQAWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
+        self.populateJsonComboBox()
+
 
     def cleanup(self) -> None:
         """Called when the application closes and the module widget is destroyed."""
@@ -181,6 +169,7 @@ class CTPhantomQAWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """Called each time the user opens this module."""
         # Make sure parameter node exists and observed
         self.initializeParameterNode()
+        self.populateJsonComboBox()
 
     def exit(self) -> None:
         """Called each time the user opens a different module."""
@@ -200,12 +189,12 @@ class CTPhantomQAWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # If this module is shown while the scene is closed then recreate a new parameter node immediately
         if self.parent.isEntered:
             self.initializeParameterNode()
+            self.populateJsonComboBox()
 
     def initializeParameterNode(self) -> None:
         """Ensure parameter node exists and observed."""
         # Parameter node stores all user choices in parameter values, node selections, etc.
-        # so that when the scene is saved and reloaded, these settings are restored.
-
+        # so that when the scene is saved and reloaded, these settings are restored
         self.setParameterNode(self.logic.getParameterNode())
 
         # Select default input nodes if nothing is selected yet to save a few clicks for the user
@@ -231,14 +220,88 @@ class CTPhantomQAWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
             self._checkCanApply()
 
-    def _checkCanApply(self, caller=None, event=None) -> None:
-        if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.thresholdedVolume:
-            self.ui.applyButton.toolTip = _("Compute output volume")
-            self.ui.applyButton.enabled = True
-        else:
-            self.ui.applyButton.toolTip = _("Select input and output volume nodes")
-            self.ui.applyButton.enabled = False
+    def populateJsonComboBox(self):
+        """Scansiona la cartella delle configurazioni JSON e popola la QComboBox."""
+        
+        # 1. Blocco temporaneo dei segnali per evitare che scattino eventi durante il caricamento
+        wasBlocking = self.ui.jsonSelectorComboBox.blockSignals(True)
+        self.ui.jsonSelectorComboBox.clear()
 
+        # 2. Definisci il percorso dove risiedono i file JSON (es. la cartella Resources/Configs del modulo)
+        configsDir = self.resourcePath("Configs")  # Oppure os.path.join(os.path.dirname(__file__), "Resources/Configs")
+        configsDir = os.path.join(os.path.dirname(__file__), "Resources/Phantoms")
+        
+        if not os.path.exists(configsDir):
+            os.makedirs(configsDir)
+            logging.warning(f"Cartella configurazioni creata: {configsDir}")
+
+        # 3. Trova tutti i file .json nella cartella
+        jsonFiles = glob.glob(os.path.join(configsDir, "*.json"))
+
+        if not jsonFiles:
+            self.ui.jsonSelectorComboBox.addItem("Nessuna configurazione trovata", None)
+            self.ui.jsonSelectorComboBox.blockSignals(wasBlocking)
+            return
+
+        # 4. Popola la ComboBox
+        for jsonPath in jsonFiles:
+            try:
+                configData = PhantomConfig.from_json(jsonPath)
+                    
+                # Cerca un titolo formale nel JSON, altrimenti usa il nome del file
+                displayName = configData.phantom_name
+                
+                # addItem(testo_visibile, valore_nascosto_userData)
+                self.ui.jsonSelectorComboBox.addItem(displayName, jsonPath)
+
+            except Exception as e:
+                logging.error(f"Errore nel caricamento del file JSON {jsonPath}: {e}")
+
+        # 5. Ripristina i segnali ed emetti l'evento per la prima selezione
+        self.ui.jsonSelectorComboBox.blockSignals(wasBlocking)
+        self.onJsonSelectionChanged()
+
+    def onJsonSelectionChanged(self):
+
+        """Gestisce l'evento di cambio di selezione del file JSON."""
+        comboBox = self.ui.jsonSelectorComboBox
+
+        # 1. Recupera l'indice dell'elemento attualmente selezionato
+        currentIndex = comboBox.currentIndex
+
+        if currentIndex < 0:
+            return
+
+        # 2. Usa itemData(index) invece di currentData()
+        selectedJsonPath = comboBox.itemData(currentIndex)
+
+        if selectedJsonPath and os.path.exists(selectedJsonPath):
+            # Aggiorna il ParameterNode se disponibile
+            if self._parameterNode:
+                self._parameterNode.selectedConfigurationFile = Path(selectedJsonPath)
+
+            logging.info(f"Configurazione selezionata: {selectedJsonPath}")
+        configData = PhantomConfig.from_json(selectedJsonPath)
+
+        self.updateConfigInfoDisplay(configData)
+
+    def updateConfigInfoDisplay(self, configData: PhantomConfig):
+        r"""
+        Construct and HTML formatted reporting the selected configuration parameters
+        """
+
+        html = f"<h3>Ciaoooooooo</h3>"
+        html += f"<b>Phantom:</b> {configData.phantom_name}<br><br>"
+
+    # Aggiorna il widget QTextEdit
+        self.ui.configurationSummary.setHtml(html)
+
+        # configurationSummary
+        ...
+
+    def _checkCanApply(self, caller=None, event=None) -> None:
+        ...
+        
     def onApplyButton(self) -> None:
         """Run processing when user clicks "Apply" button."""
         with slicer.util.tryWithErrorDisplay(_("Failed to compute results."), waitCursor=True):
@@ -277,41 +340,52 @@ class CTPhantomQALogic(ScriptedLoadableModuleLogic):
 
     def process(self,
                 inputVolume: vtkMRMLScalarVolumeNode,
-                outputVolume: vtkMRMLScalarVolumeNode,
-                imageThreshold: float,
-                invert: bool = False,
-                showResult: bool = True) -> None:
+                selectedConfigurationFile: Path
+                ) -> None:
         """
         Run the processing algorithm.
         Can be used without GUI widget.
         :param inputVolume: volume to be thresholded
-        :param outputVolume: thresholding result
-        :param imageThreshold: values above/below this threshold will be set to 0
-        :param invert: if True then values above the threshold will be set to 0, otherwise values below are set to 0
-        :param showResult: show output volume in slice viewers
         """
+        ...
 
-        if not inputVolume or not outputVolume:
-            raise ValueError("Input or output volume is invalid")
+    def plotLandmarksFromConfig(self, configData: dict) -> None:
+        ...
+        """Crea o aggiorna un nodo Markups nella scena con i landmark definiti nel JSON."""
 
-        import time
-
-        startTime = time.time()
-        logging.info("Processing started")
-
-        # Compute the thresholded output volume using the "Threshold Scalar Volume" CLI module
-        cliParams = {
-            "InputVolume": inputVolume.GetID(),
-            "OutputVolume": outputVolume.GetID(),
-            "ThresholdValue": imageThreshold,
-            "ThresholdType": "Above" if invert else "Below",
-        }
-        cliNode = slicer.cli.run(slicer.modules.thresholdscalarvolume, None, cliParams, wait_for_completion=True, update_display=showResult)
-        # We don't need the CLI module node anymore, remove it to not clutter the scene with it
-        slicer.mrmlScene.RemoveNode(cliNode)
-
-        stopTime = time.time()
-        logging.info(f"Processing completed in {stopTime-startTime:.2f} seconds")
+        #    node_name = "Phantom_Landmarks_Config"
+#
+        #    # Cerca se il nodo esiste già per non duplicarlo, altrimenti ne crea uno nuovo
+        #    markupsNode = slicer.mrmlScene.GetFirstNodeByName(node_name)
+        #    if not markupsNode:
+        #        markupsNode = slicer.mrmlScene.AddNewNodeByClass(
+        #            "vtkMRMLMarkupsFiducialNode", node_name
+        #        )
+        #        # Personalizza l'aspetto visivo (colore, dimensione)
+        #        displayNode = markupsNode.GetDisplayNode()
+        #        if displayNode:
+        #            displayNode.SetSelectedColor(0.1, 0.8, 0.1)  # Verde
+        #            displayNode.SetGlyphScale(2.5)
+#
+        #    # Pulisci i punti esistenti prima di caricare i nuovi
+        #    markupsNode.RemoveAllControlPoints()
+#
+        #    # Scansiona le ROI e i punti definiti nei moduli del JSON
+        #    modules = configData.modules
+        #    for module_id, module_info in modules.items():
+        #        landmarks = module_info.get("landmarks", [])
+#
+        #        for lm in landmarks:
+        #            name = f"{module_id}_{lm.get('name', 'Punto')}"
+        #            # Coordinate [X, Y, Z] relative al fantoccio
+        #            coords = lm.get("position", [0.0, 0.0, 0.0])
+#
+        #            # Aggiunge il punto al nodo di Slicer
+        #            markupsNode.AddControlPoint(coords, name)
+#
+        #    logging.info(
+        #        f"Caricati {markupsNode.GetNumberOfControlPoints()} landmark nella scena."
+        #)
 
 
 #
