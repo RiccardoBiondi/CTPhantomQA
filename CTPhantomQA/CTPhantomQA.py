@@ -33,7 +33,7 @@ class CTPhantomQA(ScriptedLoadableModule):
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
         self.parent.title = _("CTPhantomQA") 
-        self.parent.categories = [translate("Radiology")]
+        #self.parent.categories = [translate("Radiology")]
         self.parent.dependencies = []  # TODO: add here list of module names that this module requires
         self.parent.contributors = ["Riccardo Biondi"]  # TODO: replace with "Firstname Lastname (Organization)"
 
