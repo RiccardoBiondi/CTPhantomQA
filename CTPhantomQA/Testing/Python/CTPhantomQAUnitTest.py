@@ -70,7 +70,7 @@ class TestConfigParser:
 
 class TestHUAccuracyStrategy:
 
-    __test__ = False
+    __test__ = True
 
     @pytest.fixture(scope="class")
     def current_testing(self):

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import  Dict, Any, List, Optional, NoReturn
 
-from CTPhantomQA.QACore.roi import BaseROI
+#from CTPhantomQA.QACore.roi import BaseROI
 
 __author__ = ["Riccardo Biondi"]
 __email__ = ["riccardo.biondi@proton.me"]
@@ -36,7 +36,7 @@ class ModuleConfig:
     """
     module_name: str
     relative_z_offset_mm: float
-    rois: List[BaseROI]
+    rois: List[Dict[str, Any]]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ModuleConfig":

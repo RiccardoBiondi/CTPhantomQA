@@ -29,7 +29,7 @@ class MockScalarVolumeNode:
     def GetOrigin(self) -> Tuple[float, float, float]: 
         return self._origin_ras
 
-    def GetRASTOIJKMatrix(self, matrix = None):
+    def GetRASToIJKMatrix(self, matrix = None):
         if matrix is not None:
             return matrix
         return MockMatrix4x4()
