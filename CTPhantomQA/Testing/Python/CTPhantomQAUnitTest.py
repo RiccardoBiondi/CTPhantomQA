@@ -15,6 +15,8 @@ from pathlib import Path
 from CTPhantomQA.Testing.Python.mocks import MockScalarVolumeNode
 from CTPhantomQA.Testing.Python.mocks import mock_arrayFromVolume
 
+from CTPhantomQA.Testing.Python.mocks import MockSlicerScene
+
 
 __author__ = ["Riccardo Biondi"]
 __email__ = ["riccardo.biondi@proton.me"]
@@ -58,11 +60,19 @@ class TestConfigParser:
         assert test_101.relative_z_offset_mm == 0.0
         assert len(test_101.rois) == 1
 
+
         assert test_202.module_name == "Test202"
         assert test_202.relative_z_offset_mm == -40.0
         assert len(test_101.rois) == 1
 
 
+        roi_test_101 = test_101.rois[0]
+        roi_test_202 = test_202.rois[0]
+
+        assert roi_test_101.id == "Air"
+        assert roi_test_101.center == [0, 0]
+        assert roi_test_101.radius_mm == 5.0
+        assert roi_test_101.display == {"color": [0.0, 1.0, 0.0]}
 
 #
 # Test Cases for the evaluation of the core engine for the QA
@@ -116,3 +126,46 @@ class TestHUAccuracyStrategy:
         rerult = hu_accuracy_strategy.run(v_node=v_node, z_slice_index=0, params=params)
 
         assert params["targets"]["Air"]["expected_hu"] == -1000
+
+
+
+class ROIRenderTestStrategyBase:
+
+
+    __test__ = False
+
+    @pytest.fixture()
+    def empty_scene(self):
+        return MockSlicerScene()
+
+    
+    @pytest.fixture(autouse=True, scope="class")
+    def setup_mock(self):
+        slicer_module = types.ModuleType("slicer") # to mock the slicer environment
+        slicer_module.vtkMRMLMarkupsDisplayNode = types.ModuleType("slicer..vtkMRMLMarkupsDisplayNode")
+        slicer_module.vtkMRMLMarkupsDisplayNode.Circle2 = types.ModuleType("slicer..vtkMRMLMarkupsDisplayNode.Circle2")
+
+        slicer_module.vtkMRMLMarkupsDisplayNode.Circle2 = "circle2"
+
+        with patch.dict(sys.modules, {"slicer": slicer_module}):
+            yield slicer_module
+
+
+
+class TestRenderCircularROI(ROIRenderTestStrategyBase):
+
+    __test__ = True
+
+
+    def test_render_on_empty_scene(self, empty_scene):
+
+        from CTPhantomQA.QACore.roi import CirleROI
+
+        roi = CirleROI(id="test101", name="test_name", center=[5.0, 6.0, 0.0], radius_mm=10.)
+
+        _ = roi.slice_render(empty_scene)
+        markups_node = empty_scene.GetFirstNodeByName("ROI_test_name")
+        display_node = markups_node.GetDisplayNode()
+        control_point = markups_node.control_points
+
+        assert control_point["test101"] == [5.0, 6.0, 0.0]

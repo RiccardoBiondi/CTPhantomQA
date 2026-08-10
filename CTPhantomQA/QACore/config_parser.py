@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import  Dict, Any, List, Optional, NoReturn
 
-#from CTPhantomQA.QACore.roi import BaseROI
+from CTPhantomQA.QACore.roi import BaseROI
 
 __author__ = ["Riccardo Biondi"]
 __email__ = ["riccardo.biondi@proton.me"]
@@ -16,19 +16,17 @@ class PhantomConfigError(Exception):
     ...
 
 
+class ROIConfigFactory:
 
-#@dataclass(frozen=True)
-#class ModuleConfig:
-#    r"""
-#    """
-#    relative_z_offset_mm: float
-#    analyses: Dict[str, Dict[str, Any]]
-#
-#
-#    @classmethod
-#    def from_dict(cls, data: Dict[str, Any]) -> "ModuleConfig":
-#
-#        return cls(relative_z_offset_mm=data["relative_z_offset_mm"],analyses=data["analyses"])
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BaseROI":
+
+        if data["shape"] == "circular": 
+            from CTPhantomQA.QACore.roi import CirleROI
+
+            return CirleROI.from_dict(data)
+
+
 
 @dataclass(frozen=True)
 class ModuleConfig:
@@ -36,14 +34,15 @@ class ModuleConfig:
     """
     module_name: str
     relative_z_offset_mm: float
-    rois: List[Dict[str, Any]]
+    rois: List[BaseROI]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "ModuleConfig":
 
         _dict_sanity_check(data=data, must_contain_keys=["module_name", "relative_z_offset_mm", "rois"])
 
-        return cls(module_name=data["module_name"], relative_z_offset_mm= data["relative_z_offset_mm"], rois=[{}])
+        return cls(module_name=data["module_name"], relative_z_offset_mm= data["relative_z_offset_mm"], rois=[ROIConfigFactory.from_dict(roi) for roi in data["rois"]])
+
 
 @dataclass(frozen=True)
 class PhantomConfig:
