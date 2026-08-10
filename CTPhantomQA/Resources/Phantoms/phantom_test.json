@@ -1,7 +1,7 @@
 {
 
     "protocol_name": "Test Protocol",
-    "phantom_name": "CatPhan600",
+    "phantom_name": "Test Phantom",
     "modules": [
 
         {
@@ -13,7 +13,11 @@
                     "analysis": "hu_accuracy",
                     "shape": "circular",
                     "center": [0, 0],
-                    "radius_mm": 5.0
+                    "radius_mm": 5.0,
+                    "display": {
+                        "color": [0.0, 1.0, 0.0],
+                        "selected_color": [1.0, 0.0, 0.0]
+                    }
                 }
 
             ]
@@ -22,9 +26,14 @@
         {
             "module_name": "Test202",
             "relative_z_offset_mm": -40.0,
-            "analysis": "homogeneity",
-            "center": [0, 0],
-            "radius_mm": 5.0
+            "rois": [
+                {
+                    "id": "Teflon",
+                    "analysis": "homogeneity",
+                    "center": [0.0, 0.0],
+                    "size_xyz_mm": [20.0, 20.0, 10.0]
+                }
+            ]
         }
     ]
 }

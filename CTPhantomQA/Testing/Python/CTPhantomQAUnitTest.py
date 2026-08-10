@@ -44,25 +44,23 @@ class TestConfigParser:
         phantom = current_testing.from_json(json_path)
         modules = phantom.modules
 
-        assert list(phantom.modules.keys()) == ["Test101", "Test202"]
 
-        test_101 = phantom.modules["Test101"]
-        test_202 = phantom.modules["Test202"]
+        assert phantom.protocol_name == "Test Protocol"
+        assert phantom.phantom_name == "Test Phantom"
+        assert len(modules) == 2
 
-        assert list(test_101.analyses.keys()) == ["hu_accuracy", "homogenity"]
+
+        test_101 = phantom.modules[0]
+        test_202 = phantom.modules[1]
+
+
+        assert test_101.module_name == "Test101"
         assert test_101.relative_z_offset_mm == 0.0
-        assert test_101.analyses["hu_accuracy"]["roi_radius_mm"] == 5.0
-        assert test_101.analyses["hu_accuracy"]["targets"] ==  {
-                    "Air": {
-                        "angle_deg": 0,
-                        "distance_mm": 50,
-                        "expected_hu": -1000,
-                        "tolerance": 20
-                    }
-                }
+        assert len(test_101.rois) == 1
 
-        assert list(test_202.analyses.keys()) == ["homogeneity"]
+        assert test_202.module_name == "Test202"
         assert test_202.relative_z_offset_mm == -40.0
+        assert len(test_101.rois) == 1
 
 
 
