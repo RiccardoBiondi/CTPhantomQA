@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import  Dict, Any, List, Optional, NoReturn
 
-from CTPhantomQA.QACore.roi import BaseROI
+from .roi import BaseROI
 
 __author__ = ["Riccardo Biondi"]
 __email__ = ["riccardo.biondi@proton.me"]

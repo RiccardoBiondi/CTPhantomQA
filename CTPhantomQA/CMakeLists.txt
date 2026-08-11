@@ -10,6 +10,7 @@ set(MODULE_PYTHON_RESOURCES
   QACore/config_parser.py
   QACore/evaluators.py
   QACore/pdf_exporter.py
+  QACore/roi.py
   )
 
 # 2. DICHIARA I TUOI FILE JSON DI CONFIGURAZIONE

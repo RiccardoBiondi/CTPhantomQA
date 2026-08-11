@@ -139,16 +139,13 @@ class ROIRenderTestStrategyBase:
         return MockSlicerScene()
 
     
-    @pytest.fixture(autouse=True, scope="class")
-    def setup_mock(self):
-        slicer_module = types.ModuleType("slicer") # to mock the slicer environment
-        slicer_module.vtkMRMLMarkupsDisplayNode = types.ModuleType("slicer..vtkMRMLMarkupsDisplayNode")
-        slicer_module.vtkMRMLMarkupsDisplayNode.Circle2 = types.ModuleType("slicer..vtkMRMLMarkupsDisplayNode.Circle2")
-
-        slicer_module.vtkMRMLMarkupsDisplayNode.Circle2 = "circle2"
-
-        with patch.dict(sys.modules, {"slicer": slicer_module}):
-            yield slicer_module
+    #@pytest.fixture(autouse=True, scope="class")
+    #def setup_mock(self):
+    #    slicer_module = types.ModuleType("slicer") # to mock the slicer environment
+    #    slicer_module.vtkMRMLMarkupsDisplayNode = types.ModuleType("slicer.vtkMRMLMarkupsDisplayNode")
+  #
+    #    with patch.dict(sys.modules, {"slicer": slicer_module}):
+    #        yield slicer_module
 
 
 
@@ -157,15 +154,32 @@ class TestRenderCircularROI(ROIRenderTestStrategyBase):
     __test__ = True
 
 
-    def test_render_on_empty_scene(self, empty_scene):
+    def test_render_on_empty_scene(self, empty_scene: MockSlicerScene):
 
         from CTPhantomQA.QACore.roi import CirleROI
 
         roi = CirleROI(id="test101", name="test_name", center=[5.0, 6.0, 0.0], radius_mm=10.)
 
-        _ = roi.slice_render(empty_scene)
+        _ = roi.render(empty_scene)
+
         markups_node = empty_scene.GetFirstNodeByName("ROI_test_name")
         display_node = markups_node.GetDisplayNode()
         control_point = markups_node.control_points
 
         assert control_point["test101"] == [5.0, 6.0, 0.0]
+
+
+class TestSlicerRendering(ROIRenderTestStrategyBase):
+
+    __test__ = True
+
+    def test_test_rended_multiple_rois(self, empty_scene: MockSlicerScene): 
+        from CTPhantomQA.QACore.roi import CirleROI
+
+        roi101 = CirleROI(id="test101", name="name_101", center=[0.0, 0.0, 0.0], radius_mm=5.)
+        roi202 = CirleROI(id="test202", name="name_202", center=[5.0, 1.0, 3.5], radius_mm=15.)
+
+        _ = roi101.render(empty_scene)
+        _ = roi202.render(empty_scene)
+
+        assert len(list(empty_scene.nodes.keys())) == 2
