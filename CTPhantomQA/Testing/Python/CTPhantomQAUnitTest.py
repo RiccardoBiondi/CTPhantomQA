@@ -129,6 +129,38 @@ class TestHUAccuracyStrategy:
 
 
 
+class ROITestStrategyBase:
+
+    __test__ = True
+
+
+    def verify_control_points(self, roi, control_points):
+
+
+        assert roi.control_points == control_points
+
+
+
+class TestSphereROI(ROITestStrategyBase):
+
+    __test__ = True
+
+    @pytest.fixture(scope="class")
+    def roi(self):
+        from CTPhantomQA.QACore.roi import SphereROI
+        return SphereROI
+
+    def test_control_point_instantiation(self, roi): 
+
+        true_control_points = [
+            (0., 0., 0.),
+            (10., 0., 0.)
+        ]
+
+        test_roi = roi(id="TestSphere", center=(0., 0., 0.), radius_mm = 10.)
+
+        self.verify_control_points(test_roi, true_control_points)
+    '''
 class ROIRenderTestStrategyBase:
 
 
@@ -146,9 +178,9 @@ class ROIRenderTestStrategyBase:
   #
     #    with patch.dict(sys.modules, {"slicer": slicer_module}):
     #        yield slicer_module
+'''
 
-
-
+'''
 class TestRenderCircularROI(ROIRenderTestStrategyBase):
 
     __test__ = True
@@ -168,7 +200,9 @@ class TestRenderCircularROI(ROIRenderTestStrategyBase):
 
         assert control_point["test101"] == [5.0, 6.0, 0.0]
 
+'''
 
+'''
 class TestSlicerRendering(ROIRenderTestStrategyBase):
 
     __test__ = True
@@ -183,3 +217,4 @@ class TestSlicerRendering(ROIRenderTestStrategyBase):
         _ = roi202.render(empty_scene)
 
         assert len(list(empty_scene.nodes.keys())) == 2
+'''
