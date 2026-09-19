@@ -70,7 +70,7 @@ class TestConfigParser:
         roi_test_202 = test_202.rois[0]
 
         assert roi_test_101.id == "Air"
-        assert roi_test_101.center == [0, 0]
+        assert roi_test_101.center == [0, 0, 0]
         assert roi_test_101.radius_mm == 5.0
         assert roi_test_101.display == {"color": [0.0, 1.0, 0.0]}
 
@@ -153,11 +153,11 @@ class TestSphereROI(ROITestStrategyBase):
     def test_control_point_instantiation(self, roi): 
 
         true_control_points = [
-            (0., 0., 0.),
-            (10., 0., 0.)
+            [0., 0., 0.],
+            [10., 0., 0.]
         ]
 
-        test_roi = roi(id="TestSphere", center=(0., 0., 0.), radius_mm = 10.)
+        test_roi = roi(id="TestSphere", center=[0., 0., 0.], radius_mm = 10.)
 
         self.verify_control_points(test_roi, true_control_points)
     '''

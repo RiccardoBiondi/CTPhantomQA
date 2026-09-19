@@ -45,7 +45,7 @@ class BaseROI(ABC):
 @register_roi("sphere")
 class SphereROI(BaseROI):
 
-    def __init__(self, id: str, center: Tuple[float, float, float], radius_mm: float, name: Optional[str] = None, display: Optional[Dict[str, Any]] = None):
+    def __init__(self, id: str, center: Tuple[float, float, float], radius_mm: float, name: Optional[str] = None, display: Dict[str, Any] = {"color": [0.0, 1.0, 0.0]}, **kwargs):
 
         self.radius_mm = radius_mm
         self.display = display

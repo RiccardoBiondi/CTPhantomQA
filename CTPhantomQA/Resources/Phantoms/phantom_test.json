@@ -11,8 +11,8 @@
                 {
                     "id": "Air",
                     "name": "Air",
-                    "shape": "circular",
-                    "center": [0, 0],
+                    "shape": "sphere",
+                    "center": [0.0, 0.0, 0.0],
                     "radius_mm": 5.0
                 }
 
@@ -25,8 +25,8 @@
             "rois": [
                 {   
                     "id": "Teflon",
-                    "shape": "circular",
-                    "center": [0.0, 0.0],
+                    "shape": "sphere",
+                    "center": [0.0, 0.0, 0.0],
                     "radius_mm": 2.0
                 }
             ]

@@ -21,10 +21,15 @@ class ROIConfigFactory:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "BaseROI":
 
+        # TODO substitute with a call to the ROI register
         if data["shape"] == "circular": 
-            from CTPhantomQA.QACore.roi import CirleROI
-
+            from .roi import CirleROI
+            
             return CirleROI.from_dict(data)
+        elif data["shape"] == "sphere": 
+            from .roi import SphereROI
+            return SphereROI.from_dict(data)
+        
 
 
 
@@ -42,6 +47,8 @@ class ModuleConfig:
         _dict_sanity_check(data=data, must_contain_keys=["module_name", "relative_z_offset_mm", "rois"])
 
         return cls(module_name=data["module_name"], relative_z_offset_mm= data["relative_z_offset_mm"], rois=[ROIConfigFactory.from_dict(roi) for roi in data["rois"]])
+        
+        #cls(module_name="test_module", relative_z_offset_mm=.5, rois=[ROIConfigFactory.from_dict({"shape": None})])
 
 
 @dataclass(frozen=True)
@@ -60,6 +67,7 @@ class PhantomConfig:
         _ = _dict_sanity_check(data=data, must_contain_keys=["protocol_name", "phantom_name", "modules"])
 
         return cls(protocol_name=data["protocol_name"], phantom_name=data["phantom_name"], modules=[ModuleConfig.from_dict(mod) for mod in data["modules"]])
+        #cls(protocol_name="test", phantom_name="test", modules=[ModuleConfig.from_dict({})])
 
 
 
