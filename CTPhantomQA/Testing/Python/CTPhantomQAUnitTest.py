@@ -138,6 +138,12 @@ class ROITestStrategyBase:
 
 
         assert roi.control_points == control_points
+    
+    def verify_attributes(self, roi, attributes_lut):
+
+        for attribute in attributes_lut.keys():
+
+            assert getattr(roi, attribute) == attributes_lut[attribute]
 
 
 
@@ -160,6 +166,61 @@ class TestSphereROI(ROITestStrategyBase):
         test_roi = roi(id="TestSphere", center=[0., 0., 0.], radius_mm = 10.)
 
         self.verify_control_points(test_roi, true_control_points)
+
+    def test_update_from_control_points(self, roi):
+
+        test_roi = roi(id="TestSphere", center=[0., 0., 0.], radius_mm=5.)
+
+        new_control_points = [
+            [5., 0., 0.],
+            [15, 0, 0]
+        ]
+
+
+        gt_map = {
+            "center" : [5, 0, 0],
+            "radius_mm" : 10.
+        }
+
+        test_roi.update_from_control_points(new_control_points)
+
+        self.verify_control_points(test_roi, new_control_points)
+        self.verify_attributes(test_roi, gt_map)
+
+
+class ClynidricROITestStrategy(ROITestStrategyBase):
+
+    __test__ = True
+
+    @pytest.fixture(scope="class")
+    def roi(self):
+        from CTPhantomQA.QACore.roi import CylinderROI
+        return CylinderROI
+
+    def test_control_point_instantiation(self, roi):
+        ...
+
+    def test_update_from_control_points(self, roi):
+        ...
+
+    
+
+class TestCircleROI(ROITestStrategyBase):
+    __test__ =True
+    
+    @pytest.fixture(scope="class")
+    def roi(self):
+        from CTPhantomQA.QACore.roi import CirleROI
+        return CirleROI
+
+    def test_control_point_instantiation(self, roi):
+        ...
+
+    def test_update_from_control_points(self, roi):
+        ...
+
+        
+    
     '''
 class ROIRenderTestStrategyBase:
 

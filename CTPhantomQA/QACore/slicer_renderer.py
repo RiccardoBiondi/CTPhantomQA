@@ -16,6 +16,7 @@ class SlicerROIRenderer:
     SHAPE_MAPPING: Dict[str, int] = {
         "SphereROI": 0,#0,#slicer.vtkMRMLMarkupsShapeNode.Sphere,
         "CylinderROI": 4#slicer.vtkMRMLMarkupsShapeNode.Cylinder,
+        "CircleROI": 4 # Consider the circle as a Cylinder with height=0
         # "RingROI": slicer.vtkMRMLMarkupsShapeNode.Ring,
     }
 

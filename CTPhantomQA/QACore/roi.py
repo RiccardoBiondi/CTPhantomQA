@@ -94,8 +94,8 @@ class CirleROI(BaseROI):
 
 
 
-'''
-@register_roi("cilinder)
+
+@register_roi("cilinder")
 class CylinderROI(BaseROI):
 
     def __init__(self, id: str, center: Tuple[float, float, float], radius_mm: float, height: float, name: Optional[str] = None,  display: Dict[str, Any] = {"color": [0.0, 1.0, 0.0]}, **kwargs):
@@ -106,7 +106,7 @@ class CylinderROI(BaseROI):
         self.display = display
         self.height = height
 
-
+'''
     def render(self, scene):
         
                # if already exists, get the node, ohterwise create a new one
